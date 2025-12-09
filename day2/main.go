@@ -2,66 +2,75 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 )
 
-func isInvalidID(id int) bool {
-	s := strconv.Itoa(id)
+// isInvalidID checks if a number is an invalid ID.
+// An ID is invalid if it's made only of some sequence of digits repeated twice.
+// None of the numbers have leading zeroes; 0101 isn't an ID at all.
+func isInvalidID(num int) bool {
+	s := strconv.Itoa(num)
 
+	// Check for leading zeros. A number like "0" is valid, but "01" is not.
 	if len(s) > 1 && s[0] == '0' {
 		return false
 	}
 
-	n := len(s)
-	if n%2 != 0 {
-		return false 
+	// Iterate through possible substring lengths.
+	// The repeating substring length 'subLen' must be a divisor of the total string length.
+	// And 'subLen' must be less than the total string length.
+	for subLen := 1; subLen < len(s); subLen++ {
+		if len(s)%subLen == 0 { // Check if 'subLen' is a divisor
+			sub := s[:subLen] // Get the potential repeating substring
+			
+			// Construct the string by repeating 'sub' (len(s) / subLen) times
+			repeatedString := strings.Repeat(sub, len(s)/subLen)
+			
+			if s == repeatedString {
+				return true // Found a repeating pattern
+			}
+		}
 	}
-
-	halfLen := n / 2
-	firstHalf := s[:halfLen]
-	secondHalf := s[halfLen:]
-
-	return firstHalf == secondHalf
+	return false // No repeating pattern found
 }
 
 func main() {
-	content, err := ioutil.ReadFile("input.txt")
+	content, err := os.ReadFile("input.txt")
 	if err != nil {
-		fmt.Println("Error reading input.txt:", err)
+		fmt.Printf("Error reading input.txt: %v\n", err)
 		return
 	}
 
-	input := strings.TrimSpace(string(content))
-	ranges := strings.Split(input, ",")
+	line := strings.TrimSpace(string(content))
+	rangesStr := strings.Split(line, ",")
+	var totalSum int64 = 0
 
-	var totalInvalidIDsSum int
-	for _, r := range ranges {
-		parts := strings.Split(r, "-")
+	for _, rStr := range rangesStr {
+		parts := strings.Split(rStr, "-")
 		if len(parts) != 2 {
-			fmt.Println("Invalid range format:", r)
+			fmt.Printf("Invalid range format: %s\n", rStr)
 			continue
 		}
 
 		start, err := strconv.Atoi(parts[0])
 		if err != nil {
-			fmt.Println("Error parsing start ID:", parts[0], err)
+			fmt.Printf("Invalid start number in range %s: %v\n", rStr, err)
 			continue
 		}
-
 		end, err := strconv.Atoi(parts[1])
 		if err != nil {
-			fmt.Println("Error parsing end ID:", parts[1], err)
+			fmt.Printf("Invalid end number in range %s: %v\n", rStr, err)
 			continue
 		}
 
 		for i := start; i <= end; i++ {
 			if isInvalidID(i) {
-				totalInvalidIDsSum += i
+				totalSum += int64(i)
 			}
 		}
 	}
 
-	fmt.Println(totalInvalidIDsSum)
+	fmt.Println(totalSum)
 }
