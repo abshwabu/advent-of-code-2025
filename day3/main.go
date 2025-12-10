@@ -1,50 +1,40 @@
 package main
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
-var sum = 0
+var sum int64 = 0
 var sample = []string{"987654321111111","811111111111119","234234234234278","818181911112111"}
-func joltageCalculator(joltage string)  {
-	leng := len(joltage)
-	first := 0
-	last := 0
-	i := 0
-	largest := []string{}
-	l := 0
-	for l < leng-1{
-		s := string(joltage[l])
-		m, err := strconv.Atoi(s)
-		if err != nil {
-			panic(err)
+func joltageCalculator(joltage string) {
+	targetLength := 12
+	result := make([]byte, 0, targetLength)
+	currentIndex := 0
+
+	for digitsToTake := targetLength; digitsToTake > 0; digitsToTake-- {
+		endSearchIndex := len(joltage) - digitsToTake
+		
+		maxDigit := ' '
+		maxDigitIndex := -1
+
+		for i := currentIndex; i <= endSearchIndex; i++ {
+			if rune(joltage[i]) > maxDigit {
+				maxDigit = rune(joltage[i])
+				maxDigitIndex = i
+			}
 		}
-		if first < m {
-			first = m
-			i = l 
-		}
-		l++
+		result = append(result, byte(maxDigit))
+		currentIndex = maxDigitIndex + 1
 	}
-	largest = append(largest, strconv.Itoa(first))
-	for j:= i+1; j<leng;j++ {
-		st := string(joltage[j])
-		k,err := strconv.Atoi(st)
-		if err != nil {
-			panic(err)
-		}
-		last = max(last,k)
-	}
-	largest = append(largest, strconv.Itoa(last))
-	lj := strings.Join(largest,"")
-	n,err := strconv.Atoi(lj)
+
+	lj := string(result)
+	n, err := strconv.ParseInt(lj, 10, 64) // Using ParseInt with 64-bit to handle large numbers
 	if err != nil {
 		panic(err)
 	}
 	sum += n
-	fmt.Println(sum)
 }
 func main() {
 	
@@ -59,7 +49,7 @@ func main() {
 		joltageCalculator(line)
 	}
 	//for i := range sample {
-		//joltageCalculator(sample[i])
+	//	joltageCalculator(sample[i])
 	//}
-
+	fmt.Println(sum)
 }
