@@ -31,4 +31,6 @@ func main() {
 	println(r)
 	ingredientChecker(rangeSample,ingredientSample)
 	ingredientChecker(r,i)
+	allFresh(rangeSample)
+	allFresh(r)
 }
